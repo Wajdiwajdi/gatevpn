@@ -5,106 +5,89 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>StarGate VPN</title>
 
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
-  <!-- ✅ FIXED SUPABASE IMPORT -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <!-- Supabase (IMPORTANT: MUST be window.supabase) -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
-    body { font-family: 'Segoe UI', sans-serif; color: white; }
+    body {
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+
     .glass {
-      background: rgba(10,15,35,.45);
-      backdrop-filter: blur(24px);
-      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
     }
-    .glow-text {
-      background: linear-gradient(90deg,#38bdf8,#3b82f6,#a855f7);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    video { filter: brightness(.65); }
   </style>
 </head>
 
-<body class="min-h-screen overflow-x-hidden">
+<body class="bg-black min-h-screen flex items-center justify-center">
 
-<!-- BACKGROUND -->
-<video autoplay muted loop playsinline class="fixed inset-0 w-full h-full object-cover z-0">
-  <source src="space.mp4" type="video/mp4">
-</video>
+<!-- AUTH -->
+<div id="authBox" class="glass p-8 rounded-2xl w-96">
 
-<div class="fixed inset-0 bg-black/50 z-[1]"></div>
+  <h1 class="text-3xl mb-6 text-center">StarGate VPN</h1>
 
-<div class="relative z-10">
+  <input id="email" type="email" placeholder="Email"
+    class="w-full p-3 mb-3 rounded bg-black/50 border border-white/20">
 
-  <!-- AUTH -->
-  <div id="authPage" class="min-h-screen flex flex-col justify-center items-center p-6">
+  <input id="password" type="password" placeholder="Password"
+    class="w-full p-3 mb-5 rounded bg-black/50 border border-white/20">
 
-    <h1 class="text-6xl font-bold glow-text mb-10">StarGate VPN</h1>
+  <button onclick="signIn()"
+    class="w-full bg-blue-600 p-3 rounded mb-3 hover:bg-blue-700">
+    Login
+  </button>
 
-    <div class="glass rounded-3xl p-8 w-full max-w-md">
+  <button onclick="signUp()"
+    class="w-full bg-purple-600 p-3 rounded hover:bg-purple-700">
+    Register
+  </button>
 
-      <input id="email" type="email" placeholder="Email"
-        class="w-full mb-4 p-4 rounded-xl bg-black/30 border border-white/20">
+</div>
 
-      <input id="password" type="password" placeholder="Password"
-        class="w-full mb-6 p-4 rounded-xl bg-black/30 border border-white/20">
+<!-- DASHBOARD -->
+<div id="dashboard" class="hidden glass p-8 rounded-2xl w-[500px] text-center">
 
-      <button onclick="signIn()"
-        class="w-full py-3 mb-3 rounded-xl bg-blue-600 hover:bg-blue-700 font-bold">
-        Login
-      </button>
+  <h2 class="text-2xl mb-4">Welcome <span id="user"></span></h2>
 
-      <button onclick="signUp()"
-        class="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 font-bold">
-        Register
-      </button>
+  <button onclick="generateConfig()"
+    class="bg-green-600 p-3 rounded w-full hover:bg-green-700">
+    Generate VPN Config
+  </button>
 
-    </div>
-  </div>
+  <pre id="output" class="mt-5 text-xs bg-black/50 p-3 rounded overflow-auto"></pre>
 
-  <!-- DASHBOARD -->
-  <div id="dashboard" class="hidden min-h-screen p-8">
-
-    <div class="flex justify-between items-center mb-10">
-      <h1 class="text-3xl font-bold">
-        Welcome <span id="userName" class="text-cyan-400"></span>
-      </h1>
-
-      <button onclick="logout()" class="text-red-400 text-2xl">
-        <i class="fas fa-sign-out-alt"></i>
-      </button>
-    </div>
-
-    <div class="glass p-8 rounded-3xl max-w-3xl">
-      <h2 class="text-2xl mb-4">Your VPN Config</h2>
-
-      <button onclick="generateConfig()"
-        class="w-full py-3 bg-green-600 hover:bg-green-700 rounded-xl font-bold">
-        Generate Config
-      </button>
-
-      <pre id="configBox" class="mt-6 text-xs bg-black/40 p-4 rounded-xl overflow-auto"></pre>
-    </div>
-
-  </div>
+  <button onclick="logout()"
+    class="mt-5 text-red-400">
+    Logout
+  </button>
 
 </div>
 
 <script>
-/* ================== SUPABASE CONFIG ================== */
+console.log("JS loaded OK");
+
+/* ================== SUPABASE ================== */
 const SUPABASE_URL = "https://rbmgzryxrtdnpqizxgob.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJibWd6cnl4cnRkbnBxaXp4Z29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MDY3MzgsImV4cCI6MjA5NjA4MjczOH0.-p8xJ_DOqoqzynian8rTHJqVZi2ZfZF4CAE-wzw2opo";
 
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+/* IMPORTANT FIX */
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
 
-let currentUser = null;
+let user = null;
 
 /* ================== SIGN UP ================== */
 async function signUp() {
-  const email = email.value;
-  const password = password.value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
   const { error } = await supabaseClient.auth.signUp({
     email,
@@ -116,10 +99,10 @@ async function signUp() {
   alert("Account created! Now login.");
 }
 
-/* ================== LOGIN ================== */
+/* ================== SIGN IN ================== */
 async function signIn() {
-  const email = email.value;
-  const password = password.value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
   const { data, error } = await supabaseClient.auth.signInWithPassword({
     email,
@@ -128,30 +111,30 @@ async function signIn() {
 
   if (error) return alert(error.message);
 
-  currentUser = data.user;
+  user = data.user;
 
   showDashboard();
 }
 
 /* ================== DASHBOARD ================== */
 function showDashboard() {
-  document.getElementById("authPage").classList.add("hidden");
+  document.getElementById("authBox").classList.add("hidden");
   document.getElementById("dashboard").classList.remove("hidden");
 
-  document.getElementById("userName").textContent =
-    currentUser.email.split("@")[0];
+  document.getElementById("user").innerText =
+    user.email.split("@")[0];
 }
 
 /* ================== CONFIG ================== */
 function generateConfig() {
   const config = `
 # StarGate VPN
-# User: ${currentUser.email}
-# Date: ${new Date().toLocaleString()}
+# User: ${user.email}
+# Generated: ${new Date().toLocaleString()}
 
 [Interface]
 PrivateKey = YOUR_PRIVATE_KEY
-Address = 10.13.13.2/32
+Address = 10.0.0.2/32
 DNS = 1.1.1.1
 
 [Peer]
@@ -161,7 +144,7 @@ AllowedIPs = 0.0.0.0/0
 PersistentKeepalive = 25
 `;
 
-  document.getElementById("configBox").textContent = config;
+  document.getElementById("output").textContent = config;
 }
 
 /* ================== LOGOUT ================== */
@@ -170,12 +153,12 @@ async function logout() {
   location.reload();
 }
 
-/* ================== AUTO LOGIN ================== */
+/* ================== AUTO SESSION ================== */
 window.onload = async () => {
   const { data } = await supabaseClient.auth.getSession();
 
   if (data.session) {
-    currentUser = data.session.user;
+    user = data.session.user;
     showDashboard();
   }
 };
