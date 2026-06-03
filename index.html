@@ -4,234 +4,182 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>StarGate VPN</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- ✅ FIXED SUPABASE IMPORT -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
   <style>
-    body{
-      font-family:'Segoe UI',sans-serif;
-      color:white;
+    body { font-family: 'Segoe UI', sans-serif; color: white; }
+    .glass {
+      background: rgba(10,15,35,.45);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,.1);
     }
-    .glass{
-      background:rgba(10,15,35,.45);
-      backdrop-filter:blur(24px);
-      border:1px solid rgba(255,255,255,.1);
-      box-shadow: 0 0 25px rgba(59,130,246,.15), 0 0 70px rgba(168,85,247,.08);
+    .glow-text {
+      background: linear-gradient(90deg,#38bdf8,#3b82f6,#a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
-    .glow-text{
-      background:linear-gradient(90deg, #38bdf8, #3b82f6, #a855f7);
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-    }
-    input{
-      outline:none;
-    }
-    video{
-      filter:brightness(.65);
-    }
+    video { filter: brightness(.65); }
   </style>
 </head>
+
 <body class="min-h-screen overflow-x-hidden">
 
-  <!-- VIDEO BACKGROUND -->
-  <video autoplay muted loop playsinline class="fixed inset-0 w-full h-full object-cover z-0">
-    <source src="space.mp4" type="video/mp4">
-  </video>
+<!-- BACKGROUND -->
+<video autoplay muted loop playsinline class="fixed inset-0 w-full h-full object-cover z-0">
+  <source src="space.mp4" type="video/mp4">
+</video>
 
-  <!-- OVERLAY -->
-  <div class="fixed inset-0 bg-black/50 z-[1]"></div>
+<div class="fixed inset-0 bg-black/50 z-[1]"></div>
 
-  <!-- CONTENT -->
-  <div class="relative z-10">
+<div class="relative z-10">
 
-    <!-- AUTH PAGE -->
-    <div id="authPage" class="min-h-screen flex flex-col justify-center items-center p-6">
-      <div class="text-center mb-12">
-        <h1 class="text-7xl font-extrabold glow-text">StarGate VPN</h1>
-        <p class="text-cyan-300 text-xl mt-4">Private Tunnel Through Space</p>
-      </div>
+  <!-- AUTH -->
+  <div id="authPage" class="min-h-screen flex flex-col justify-center items-center p-6">
 
-      <div class="glass rounded-3xl p-10 w-full max-w-md">
-        <h2 class="text-3xl font-semibold text-center mb-8">Access Portal</h2>
-        <div class="space-y-5">
-          <div class="relative">
-            <i class="fas fa-envelope absolute left-5 top-1/2 -translate-y-1/2 text-gray-400"></i>
-            <input id="email" type="email" placeholder="Email Address" 
-                   class="w-full pl-14 pr-4 py-4 rounded-2xl bg-black/20 border border-white/20">
-          </div>
-          <div class="relative">
-            <i class="fas fa-lock absolute left-5 top-1/2 -translate-y-1/2 text-gray-400"></i>
-            <input id="password" type="password" placeholder="Password" 
-                   class="w-full pl-14 pr-4 py-4 rounded-2xl bg-black/20 border border-white/20">
-          </div>
-          
-          <button onclick="signIn()" 
-                  class="w-full py-4 rounded-2xl font-semibold text-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition">
-            Login
-          </button>
-          
-          <button onclick="signUp()" 
-                  class="w-full py-4 rounded-2xl font-semibold text-lg bg-gradient-to-r from-purple-500 to-pink-600 hover:scale-105 transition">
-            Register New Account
-          </button>
-        </div>
-      </div>
-    </div>
+    <h1 class="text-6xl font-bold glow-text mb-10">StarGate VPN</h1>
 
-    <!-- VERIFICATION PAGE -->
-    <div id="verifyPage" class="hidden min-h-screen flex flex-col justify-center items-center p-6">
-      <div class="glass rounded-3xl p-10 w-full max-w-md text-center">
-        <h2 class="text-3xl font-semibold mb-4">Check Your Email</h2>
-        <p class="text-cyan-300 mb-8">Enter the 6-digit code we sent</p>
-        <input id="code" type="text" maxlength="6" placeholder="123456" 
-               class="w-full text-center text-4xl tracking-widest py-6 bg-black/30 border border-white/20 rounded-2xl mb-6">
-        <button onclick="verifyCode()" 
-                class="w-full py-4 rounded-2xl font-semibold bg-green-500 hover:bg-green-600">
-          Verify Code
-        </button>
-      </div>
-    </div>
+    <div class="glass rounded-3xl p-8 w-full max-w-md">
 
-    <!-- DASHBOARD -->
-    <div id="dashboard" class="hidden min-h-screen p-6">
-      <div class="max-w-7xl mx-auto">
-        <div class="flex justify-between items-center mb-10">
-          <h1 class="text-4xl font-bold">
-            Welcome back, <span id="userName" class="text-cyan-400"></span>
-          </h1>
-          <button onclick="logout()" class="text-red-400 text-3xl">
-            <i class="fas fa-sign-out-alt"></i>
-          </button>
-        </div>
+      <input id="email" type="email" placeholder="Email"
+        class="w-full mb-4 p-4 rounded-xl bg-black/30 border border-white/20">
 
-        <div class="grid lg:grid-cols-2 gap-8">
-          <div class="glass rounded-3xl p-8">
-            <h2 class="text-2xl font-semibold mb-6">Your WireGuard Client</h2>
-            <div id="configArea"></div>
-          </div>
+      <input id="password" type="password" placeholder="Password"
+        class="w-full mb-6 p-4 rounded-xl bg-black/30 border border-white/20">
 
-          <div class="glass rounded-3xl p-8">
-            <h2 class="text-2xl font-semibold mb-6">How To Connect (24/7)</h2>
-            <ol class="space-y-4 text-gray-300 list-decimal pl-5">
-              <li>Download your personal config file</li>
-              <li>Install WireGuard app</li>
-              <li>Import the .conf file</li>
-              <li>Connect and keep it running 24/7</li>
-            </ol>
-          </div>
-        </div>
-      </div>
+      <button onclick="signIn()"
+        class="w-full py-3 mb-3 rounded-xl bg-blue-600 hover:bg-blue-700 font-bold">
+        Login
+      </button>
+
+      <button onclick="signUp()"
+        class="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 font-bold">
+        Register
+      </button>
+
     </div>
   </div>
 
-  <script>
-    // ================= SUPABASE SETUP =================
-    const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';     // ← CHANGE
-    const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY-HERE';               // ← CHANGE
+  <!-- DASHBOARD -->
+  <div id="dashboard" class="hidden min-h-screen p-8">
 
-    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    <div class="flex justify-between items-center mb-10">
+      <h1 class="text-3xl font-bold">
+        Welcome <span id="userName" class="text-cyan-400"></span>
+      </h1>
 
-    let currentUser = null;
+      <button onclick="logout()" class="text-red-400 text-2xl">
+        <i class="fas fa-sign-out-alt"></i>
+      </button>
+    </div>
 
-    async function signUp() {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
+    <div class="glass p-8 rounded-3xl max-w-3xl">
+      <h2 class="text-2xl mb-4">Your VPN Config</h2>
 
-      if (!email || !password) return alert("Please fill email and password");
+      <button onclick="generateConfig()"
+        class="w-full py-3 bg-green-600 hover:bg-green-700 rounded-xl font-bold">
+        Generate Config
+      </button>
 
-      const { error } = await supabase.auth.signUp({ email, password });
-      if (error) alert(error.message);
-      else alert("Registration successful! Please check your email.");
-    }
+      <pre id="configBox" class="mt-6 text-xs bg-black/40 p-4 rounded-xl overflow-auto"></pre>
+    </div>
 
-    async function signIn() {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
+  </div>
 
-      if (!email || !password) return alert("Please fill all fields");
+</div>
 
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+<script>
+/* ================== SUPABASE CONFIG ================== */
+const SUPABASE_URL = "https://rbmgzryxrtdnpqizxgob.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJibWd6cnl4cnRkbnBxaXp4Z29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MDY3MzgsImV4cCI6MjA5NjA4MjczOH0.-p8xJ_DOqoqzynian8rTHJqVZi2ZfZF4CAE-wzw2opo";
 
-      if (error) {
-        alert(error.message);
-      } else {
-        currentUser = data.user;
-        document.getElementById('authPage').classList.add('hidden');
-        document.getElementById('verifyPage').classList.remove('hidden');
-      }
-    }
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    async function verifyCode() {
-      const code = document.getElementById('code').value.trim();
-      if (code.length !== 6) return alert("Please enter 6 digits");
+let currentUser = null;
 
-      const { error } = await supabase.auth.verifyOtp({
-        email: currentUser.email,
-        token: code,
-        type: 'email'
-      });
+/* ================== SIGN UP ================== */
+async function signUp() {
+  const email = email.value;
+  const password = password.value;
 
-      if (error) {
-        alert(error.message);
-      } else {
-        document.getElementById('verifyPage').classList.add('hidden');
-        document.getElementById('dashboard').classList.remove('hidden');
-        document.getElementById('userName').textContent = currentUser.email.split('@')[0];
-        showConfigStatus();
-      }
-    }
+  const { error } = await supabaseClient.auth.signUp({
+    email,
+    password
+  });
 
-    function showConfigStatus() {
-      const area = document.getElementById('configArea');
-      area.innerHTML = `
-        <button onclick="generateNewConfig()" 
-                class="w-full py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 font-semibold">
-          Generate New Config (24/7 Ready)
-        </button>`;
-    }
+  if (error) return alert(error.message);
 
-    function generateNewConfig() {
-      const content = `# StarGate VPN - ${currentUser.email}
-# Generated: ${new Date().toLocaleString()}
+  alert("Account created! Now login.");
+}
+
+/* ================== LOGIN ================== */
+async function signIn() {
+  const email = email.value;
+  const password = password.value;
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) return alert(error.message);
+
+  currentUser = data.user;
+
+  showDashboard();
+}
+
+/* ================== DASHBOARD ================== */
+function showDashboard() {
+  document.getElementById("authPage").classList.add("hidden");
+  document.getElementById("dashboard").classList.remove("hidden");
+
+  document.getElementById("userName").textContent =
+    currentUser.email.split("@")[0];
+}
+
+/* ================== CONFIG ================== */
+function generateConfig() {
+  const config = `
+# StarGate VPN
+# User: ${currentUser.email}
+# Date: ${new Date().toLocaleString()}
 
 [Interface]
-PrivateKey = YOUR_PRIVATE_KEY_HERE
+PrivateKey = YOUR_PRIVATE_KEY
 Address = 10.13.13.2/32
 DNS = 1.1.1.1
-MTU = 1420
 
 [Peer]
-PublicKey = SERVER_PUBLIC_KEY_HERE
+PublicKey = SERVER_PUBLIC_KEY
+Endpoint = your-server.com:51820
 AllowedIPs = 0.0.0.0/0
-Endpoint = myvpn123.duckdns.org:51820
-PersistentKeepalive = 25`;
+PersistentKeepalive = 25
+`;
 
-      const blob = new Blob([content], { type: 'text/plain' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `stargate-${currentUser.email.split('@')[0]}.conf`;
-      a.click();
+  document.getElementById("configBox").textContent = config;
+}
 
-      alert("✅ Config downloaded successfully!");
-    }
+/* ================== LOGOUT ================== */
+async function logout() {
+  await supabaseClient.auth.signOut();
+  location.reload();
+}
 
-    function logout() {
-      supabase.auth.signOut();
-      location.reload();
-    }
+/* ================== AUTO LOGIN ================== */
+window.onload = async () => {
+  const { data } = await supabaseClient.auth.getSession();
 
-    // Check if already logged in
-    window.onload = () => {
-      supabase.auth.getSession().then(({ data }) => {
-        if (data.session) {
-          currentUser = data.session.user;
-          document.getElementById('authPage').classList.add('hidden');
-          document.getElementById('dashboard').classList.remove('hidden');
-          document.getElementById('userName').textContent = currentUser.email.split('@')[0];
-          showConfigStatus();
-        }
-      });
-    };
-  </script>
+  if (data.session) {
+    currentUser = data.session.user;
+    showDashboard();
+  }
+};
+</script>
+
 </body>
 </html>
