@@ -64,10 +64,12 @@
             <input id="password" type="password" placeholder="Password" 
                    class="w-full pl-14 pr-4 py-4 rounded-2xl bg-black/20 border border-white/20">
           </div>
+          
           <button onclick="signIn()" 
                   class="w-full py-4 rounded-2xl font-semibold text-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition">
             Login
           </button>
+          
           <button onclick="signUp()" 
                   class="w-full py-4 rounded-2xl font-semibold text-lg bg-gradient-to-r from-purple-500 to-pink-600 hover:scale-105 transition">
             Register New Account
@@ -76,11 +78,11 @@
       </div>
     </div>
 
-    <!-- VERIFICATION CODE PAGE -->
+    <!-- VERIFICATION PAGE -->
     <div id="verifyPage" class="hidden min-h-screen flex flex-col justify-center items-center p-6">
       <div class="glass rounded-3xl p-10 w-full max-w-md text-center">
         <h2 class="text-3xl font-semibold mb-4">Check Your Email</h2>
-        <p class="text-cyan-300 mb-8">We sent a 6-digit code to your email</p>
+        <p class="text-cyan-300 mb-8">Enter the 6-digit code we sent</p>
         <input id="code" type="text" maxlength="6" placeholder="123456" 
                class="w-full text-center text-4xl tracking-widest py-6 bg-black/30 border border-white/20 rounded-2xl mb-6">
         <button onclick="verifyCode()" 
@@ -103,21 +105,18 @@
         </div>
 
         <div class="grid lg:grid-cols-2 gap-8">
-          <!-- CONFIG CARD -->
           <div class="glass rounded-3xl p-8">
             <h2 class="text-2xl font-semibold mb-6">Your WireGuard Client</h2>
             <div id="configArea"></div>
           </div>
 
-          <!-- GUIDE -->
           <div class="glass rounded-3xl p-8">
             <h2 class="text-2xl font-semibold mb-6">How To Connect (24/7)</h2>
             <ol class="space-y-4 text-gray-300 list-decimal pl-5">
               <li>Download your personal config file</li>
-              <li>Install WireGuard (official app)</li>
+              <li>Install WireGuard app</li>
               <li>Import the .conf file</li>
-              <li>Enable "Persistent Keepalive"</li>
-              <li>Connect — Works 24/7</li>
+              <li>Connect and keep it running 24/7</li>
             </ol>
           </div>
         </div>
@@ -126,45 +125,46 @@
   </div>
 
   <script>
-    // ================== SUPABASE CONFIG ==================
-    const SUPABASE_URL = 'https://rbmgzryxrtdnpqizxgob.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJibWd6cnl4cnRkbnBxaXp4Z29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MDY3MzgsImV4cCI6MjA5NjA4MjczOH0.-p8xJ_DOqoqzynian8rTHJqVZi2ZfZF4CAE-wzw2opo';
+    // ================= SUPABASE SETUP =================
+    const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';     // ← CHANGE
+    const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY-HERE';               // ← CHANGE
 
     const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let currentUser = null;
 
-    // Sign Up
     async function signUp() {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
 
-      if (!email || !password) return alert("Email and password required");
+      if (!email || !password) return alert("Please fill email and password");
 
       const { error } = await supabase.auth.signUp({ email, password });
       if (error) alert(error.message);
-      else alert("Registration successful! Please check your email to confirm.");
+      else alert("Registration successful! Please check your email.");
     }
 
-    // Sign In
     async function signIn() {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
 
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) return alert(error.message);
+      if (!email || !password) return alert("Please fill all fields");
 
-      currentUser = data.user;
-      document.getElementById('authPage').classList.add('hidden');
-      document.getElementById('verifyPage').classList.remove('hidden');
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        alert(error.message);
+      } else {
+        currentUser = data.user;
+        document.getElementById('authPage').classList.add('hidden');
+        document.getElementById('verifyPage').classList.remove('hidden');
+      }
     }
 
-    // Verify Code
     async function verifyCode() {
       const code = document.getElementById('code').value.trim();
-      if (code.length !== 6) return alert("Enter 6-digit code");
+      if (code.length !== 6) return alert("Please enter 6 digits");
 
-      // Supabase handles OTP verification internally
       const { error } = await supabase.auth.verifyOtp({
         email: currentUser.email,
         token: code,
@@ -181,45 +181,23 @@
       }
     }
 
-    async function showConfigStatus() {
+    function showConfigStatus() {
       const area = document.getElementById('configArea');
-
-      // Try to fetch from your private repo "ip-rotator"
-      try {
-        const response = await fetch('https://api.github.com/repos/wajdiwajdi/ip-rotator/contents/configs');
-        if (response.ok) {
-          area.innerHTML = `
-            <p class="text-green-400 mb-6">✅ Config found in private repo</p>
-            <button onclick="downloadFromRepo()" class="px-8 py-4 rounded-2xl bg-green-600 hover:bg-green-700 w-full">
-              <i class="fas fa-download mr-2"></i> Download My Config
-            </button>`;
-          return;
-        }
-      } catch(e) {}
-
-      // Fallback: Generate new
       area.innerHTML = `
-        <button onclick="generateNewConfig()" class="px-8 py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 w-full">
-          Generate New 24/7 Config
+        <button onclick="generateNewConfig()" 
+                class="w-full py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 font-semibold">
+          Generate New Config (24/7 Ready)
         </button>`;
     }
 
-    async function downloadFromRepo() {
-      alert("Downloading from private repo 'ip-rotator'...\n\nMake sure you have a token with repo access if needed.");
-      // You can expand this with GitHub token later
-      downloadConfig();
-    }
-
     function generateNewConfig() {
-      const content = `# ==================== StarGate VPN ====================
-# User: ${currentUser.email}
+      const content = `# StarGate VPN - ${currentUser.email}
 # Generated: ${new Date().toLocaleString()}
-# Keepalive enabled for 24/7 stability
 
 [Interface]
 PrivateKey = YOUR_PRIVATE_KEY_HERE
 Address = 10.13.13.2/32
-DNS = 1.1.1.1, 8.8.8.8
+DNS = 1.1.1.1
 MTU = 1420
 
 [Peer]
@@ -234,11 +212,7 @@ PersistentKeepalive = 25`;
       a.download = `stargate-${currentUser.email.split('@')[0]}.conf`;
       a.click();
 
-      alert("✅ Config downloaded! (Ready for 24/7 use)");
-    }
-
-    function downloadConfig() {
-      generateNewConfig();
+      alert("✅ Config downloaded successfully!");
     }
 
     function logout() {
@@ -246,16 +220,18 @@ PersistentKeepalive = 25`;
       location.reload();
     }
 
-    // Auto check if already logged in
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) {
-        currentUser = data.session.user;
-        document.getElementById('authPage').classList.add('hidden');
-        document.getElementById('dashboard').classList.remove('hidden');
-        document.getElementById('userName').textContent = currentUser.email.split('@')[0];
-        showConfigStatus();
-      }
-    });
+    // Check if already logged in
+    window.onload = () => {
+      supabase.auth.getSession().then(({ data }) => {
+        if (data.session) {
+          currentUser = data.session.user;
+          document.getElementById('authPage').classList.add('hidden');
+          document.getElementById('dashboard').classList.remove('hidden');
+          document.getElementById('userName').textContent = currentUser.email.split('@')[0];
+          showConfigStatus();
+        }
+      });
+    };
   </script>
 </body>
 </html>
