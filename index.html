@@ -1,181 +1,356 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>StarGate VPN • Secure Space Tunnel</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-  <style>
-    body { background: linear-gradient(135deg, #0a0a1f 0%, #1a0033 100%); color: #e0e7ff; font-family: 'Segoe UI', sans-serif; }
-    .astronaut { animation: floatAstronaut 9s ease-in-out infinite; }
-    @keyframes floatAstronaut { 0%,100% { transform: translateY(0) rotate(-8deg); } 50% { transform: translateY(-50px) rotate(8deg); } }
-    .star { position: absolute; background: white; border-radius: 50%; animation: twinkle 6s infinite; }
-  </style>
-</head>
-<body class="min-h-screen relative overflow-hidden">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <div><!-- Background Video -->
+<title>StarGate VPN</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+<style>
+body{
+    font-family:'Segoe UI',sans-serif;
+    color:white;
+}
+
+.glass{
+    background:rgba(10,15,35,.45);
+    backdrop-filter:blur(24px);
+    border:1px solid rgba(255,255,255,.1);
+    box-shadow:
+        0 0 25px rgba(59,130,246,.15),
+        0 0 70px rgba(168,85,247,.08);
+}
+
+.glow-text{
+    background:linear-gradient(
+        90deg,
+        #38bdf8,
+        #3b82f6,
+        #a855f7
+    );
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+input{
+    outline:none;
+}
+
+video{
+    filter:brightness(.65);
+}
+</style>
+</head>
+
+<body class="min-h-screen overflow-x-hidden">
+
+<!-- VIDEO BACKGROUND -->
 <video
-  autoplay
-  muted
-  loop
-  playsinline
-  class="fixed inset-0 w-full h-full object-cover -z-10"
->
-  <source src="space.mp4" type="video/mp4">
+autoplay
+muted
+loop
+playsinline
+class="fixed inset-0 w-full h-full object-cover z-0">
+    <source src="space.mp4" type="video/mp4">
 </video>
 
-<!-- Dark Overlay -->
-<div class="fixed inset-0 bg-black/50 -z-10"></div></div></div>
-  <div class="fixed bottom-10 right-10 text-[190px] z-50 astronaut">🧑‍🚀</div>
+<!-- OVERLAY -->
+<div class="fixed inset-0 bg-black/50 z-[1]"></div>
 
-  <div class="max-w-4xl mx-auto p-6 relative z-10">
+<!-- CONTENT -->
+<div class="relative z-10">
 
-    <!-- Login / Register -->
-    <div id="authPage">
-      <div class="text-center py-12">
-        <h1 class="text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">StarGate VPN</h1>
-        <p class="text-blue-300">Private • Secure • Anonymous</p>
-      </div>
+<!-- LOGIN PAGE -->
+<div id="authPage" class="min-h-screen flex flex-col justify-center items-center p-6">
 
-      <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-10 border border-white/20 max-w-md mx-auto">
-        <h2 class="text-3xl font-semibold text-center mb-8">Access Portal</h2>
+    <div class="text-center mb-12">
+        <h1 class="text-7xl font-extrabold glow-text">
+            StarGate VPN
+        </h1>
+
+        <p class="text-cyan-300 text-xl mt-4">
+            Private Tunnel Through Space
+        </p>
+    </div>
+
+    <div class="glass rounded-3xl p-10 w-full max-w-md">
+
+        <h2 class="text-3xl font-semibold text-center mb-8">
+            Login / Register
+        </h2>
+
         <div class="space-y-5">
-          <input type="email" id="email" placeholder="Email Address" class="w-full px-6 py-4 bg-white/10 border border-white/30 rounded-2xl focus:border-blue-400">
-          <input type="text" id="username" placeholder="Username" class="w-full px-6 py-4 bg-white/10 border border-white/30 rounded-2xl focus:border-blue-400">
-          <input type="password" id="password" placeholder="Password" class="w-full px-6 py-4 bg-white/10 border border-white/30 rounded-2xl focus:border-blue-400">
-          <button onclick="handleAuth()" class="w-full py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl font-semibold text-lg">Login / Register</button>
+
+            <div class="relative">
+                <i class="fas fa-envelope absolute left-5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+
+                <input
+                id="email"
+                type="email"
+                placeholder="Email Address"
+                class="w-full pl-14 pr-4 py-4 rounded-2xl bg-black/20 border border-white/20">
+            </div>
+
+            <div class="relative">
+                <i class="fas fa-user absolute left-5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+
+                <input
+                id="username"
+                type="text"
+                placeholder="Username"
+                class="w-full pl-14 pr-4 py-4 rounded-2xl bg-black/20 border border-white/20">
+            </div>
+
+            <div class="relative">
+                <i class="fas fa-lock absolute left-5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+
+                <input
+                id="password"
+                type="password"
+                placeholder="Password"
+                class="w-full pl-14 pr-4 py-4 rounded-2xl bg-black/20 border border-white/20">
+            </div>
+
+            <button
+            onclick="handleAuth()"
+            class="w-full py-4 rounded-2xl font-semibold text-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition">
+                Continue
+            </button>
+
         </div>
-      </div>
+    </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="hidden min-h-screen p-6">
+
+    <div class="max-w-7xl mx-auto">
+
+        <div class="flex justify-between items-center mb-10">
+
+            <h1 class="text-4xl font-bold">
+                Welcome back,
+                <span id="userName" class="text-cyan-400"></span>
+            </h1>
+
+            <button onclick="logout()">
+                <i class="fas fa-sign-out-alt text-red-400 text-2xl"></i>
+            </button>
+
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-8">
+
+            <!-- CONFIG CARD -->
+            <div class="glass rounded-3xl p-8">
+
+                <h2 class="text-2xl font-semibold mb-6">
+                    Your WireGuard Client
+                </h2>
+
+                <div id="configArea"></div>
+
+            </div>
+
+            <!-- GUIDE CARD -->
+            <div class="glass rounded-3xl p-8">
+
+                <h2 class="text-2xl font-semibold mb-6">
+                    How To Connect
+                </h2>
+
+                <ol class="space-y-4 text-gray-300 list-decimal pl-5">
+
+                    <li>Download your VPN config file.</li>
+
+                    <li>Install WireGuard on your device.</li>
+
+                    <li>Import the downloaded .conf file.</li>
+
+                    <li>Connect to StarGate VPN.</li>
+
+                    <li>Enjoy a secure private tunnel.</li>
+
+                </ol>
+
+                <div class="mt-10 text-center">
+                    <i class="fas fa-shield-halved text-7xl text-purple-400"></i>
+                </div>
+
+            </div>
+
+        </div>
     </div>
 
-    <!-- Dashboard -->
-    <div id="dashboard" class="hidden">
-      <div class="flex justify-between items-center mb-8">
-        <h1 class="text-4xl font-bold">Welcome, <span id="userName" class="text-blue-400"></span></h1>
-        <button onclick="logout()" class="text-red-400"><i class="fas fa-sign-out-alt text-2xl"></i></button>
-      </div>
+</div>
 
-      <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20">
-        <h2 class="text-2xl mb-6">Your Personal VPN Config</h2>
-        
-        <div id="configArea"></div>
+</div>
 
-        <div class="mt-10">
-          <h3 class="font-semibold mb-4">How to Use:</h3>
-          <ol class="list-decimal pl-5 space-y-3 text-gray-300">
-            <li>Download the config file below</li>
-            <li>Install WireGuard from official website or app store</li>
-            <li>Import the .conf file</li>
-            <li>Connect and enjoy private internet</li>
-          </ol>
-        </div>
-      </div>
-    </div>
-  </div>
+<script>
 
-  <script>
-    let currentUser = null;
+let currentUser = null;
 
-    function handleAuth() {
-      const email = document.getElementById('email').value.trim().toLowerCase();
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
+function handleAuth(){
 
-      if (!email || !username || !password) {
-        alert("All fields are required");
+    const email =
+    document.getElementById("email")
+    .value.trim().toLowerCase();
+
+    const username =
+    document.getElementById("username")
+    .value.trim();
+
+    const password =
+    document.getElementById("password")
+    .value.trim();
+
+    if(!email || !username || !password){
+        alert("Please fill all fields");
         return;
-      }
-
-      currentUser = { email, username };
-      localStorage.setItem('stargate_current_user', JSON.stringify(currentUser));
-
-      document.getElementById('authPage').classList.add('hidden');
-      document.getElementById('dashboard').classList.remove('hidden');
-      document.getElementById('userName').textContent = username;
-
-      showConfigStatus();
     }
 
-    function showConfigStatus() {
-      const configs = JSON.parse(localStorage.getItem('stargate_configs') || '{}');
-      const area = document.getElementById('configArea');
+    currentUser = {
+        email,
+        username
+    };
 
-      if (configs[currentUser.email]) {
+    localStorage.setItem(
+        "stargate_current_user",
+        JSON.stringify(currentUser)
+    );
+
+    document
+    .getElementById("authPage")
+    .classList.add("hidden");
+
+    document
+    .getElementById("dashboard")
+    .classList.remove("hidden");
+
+    document
+    .getElementById("userName")
+    .textContent = username;
+
+    showConfigStatus();
+}
+
+function showConfigStatus(){
+
+    const configs =
+    JSON.parse(
+        localStorage.getItem(
+            "stargate_configs"
+        ) || "{}"
+    );
+
+    const area =
+    document.getElementById(
+        "configArea"
+    );
+
+    if(configs[currentUser.email]){
+
         area.innerHTML = `
-          <p class="text-green-400 mb-4">✅ You already have a config file</p>
-          <button onclick="downloadConfig()" class="px-8 py-4 bg-green-600 rounded-2xl font-semibold flex items-center gap-3">
-            <i class="fas fa-download"></i> Download Config
-          </button>`;
-      } else {
+        <p class="text-green-400 mb-6">
+        ✅ Configuration already exists
+        </p>
+
+        <button
+        onclick="downloadConfig()"
+        class="px-8 py-4 rounded-2xl bg-green-600 hover:bg-green-700">
+
+            <i class="fas fa-download mr-2"></i>
+            Download Config
+
+        </button>
+        `;
+
+    }else{
+
         area.innerHTML = `
-          <button onclick="generateNewConfig()" class="px-8 py-4 bg-blue-600 rounded-2xl font-semibold">
-            Generate My VPN Config
-          </button>`;
-      }
+        <p class="text-yellow-400 mb-6">
+        No VPN configuration found.
+        </p>
+
+        <button
+        onclick="generateNewConfig()"
+        class="px-8 py-4 rounded-2xl bg-blue-600 hover:bg-blue-700">
+
+            Generate New Config
+
+        </button>
+        `;
     }
+}
 
-    function generateNewConfig() {
-      let configs = JSON.parse(localStorage.getItem('stargate_configs') || '{}');
-      
-      if (configs[currentUser.email]) {
-        alert("You already have one config.");
+function generateNewConfig(){
+
+    const configs =
+    JSON.parse(
+        localStorage.getItem(
+            "stargate_configs"
+        ) || "{}"
+    );
+
+    if(configs[currentUser.email]){
+        alert("Config already exists.");
         return;
-      }
-
-      configs[currentUser.email] = { created: new Date().toISOString() };
-      localStorage.setItem('stargate_configs', JSON.stringify(configs));
-
-      alert("✅ Config generated successfully!");
-      showConfigStatus();
     }
 
-    function downloadConfig() {
-      const content = `# ===================== StarGate VPN =====================
-# User: ${currentUser.username}
-# Email: ${currentUser.email}
-# Generated: ${new Date().toLocaleString()}
+    configs[currentUser.email] = {
+        created:new Date().toISOString()
+    };
 
+    localStorage.setItem(
+        "stargate_configs",
+        JSON.stringify(configs)
+    );
+
+    alert("Configuration created!");
+    showConfigStatus();
+}
+
+function downloadConfig(){
+
+    const content = `
 [Interface]
-PrivateKey = YOUR_PRIVATE_KEY_HERE
+PrivateKey = YOUR_PRIVATE_KEY
 Address = 10.13.13.2/32
 DNS = 1.1.1.1
 
 [Peer]
-PublicKey = SERVER_PUBLIC_KEY_HERE
+PublicKey = SERVER_PUBLIC_KEY
 AllowedIPs = 0.0.0.0/0
-Endpoint = myvpn123.duckdns.org:51820
-PersistentKeepalive = 25`;
+Endpoint = vpn.example.com:51820
+PersistentKeepalive = 25
+`;
 
-      const blob = new Blob([content], { type: 'text/plain' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `stargate-${currentUser.username}.conf`;
-      a.click();
-    }
+    const blob =
+    new Blob(
+        [content],
+        {type:"text/plain"}
+    );
 
-    function logout() {
-      if (confirm("Logout?")) location.reload();
-    }
+    const a =
+    document.createElement("a");
 
-    // Create Stars
-    function createStars() {
-      const container = document.getElementById('stars');
-      for (let i = 0; i < 200; i++) {
-        const star = document.createElement('div');
-        star.className = 'star';
-        const size = Math.random() * 3 + 1;
-        star.style.width = `${size}px`;
-        star.style.height = `${size}px`;
-        star.style.left = `${Math.random() * 100}vw`;
-        star.style.top = `${Math.random() * 100}vh`;
-        star.style.animationDelay = `-${Math.random() * 8}s`;
-        container.appendChild(star);
-      }
-    }
+    a.href =
+    URL.createObjectURL(blob);
 
-    window.onload = createStars;
-  </script>
+    a.download =
+    "stargate.conf";
+
+    a.click();
+}
+
+function logout(){
+    location.reload();
+}
+
+</script>
+
 </body>
 </html>
