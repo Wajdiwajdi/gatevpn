@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StarGate VPN • Secure Space Tunnel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #0a0a1f 0%, #1a0033 100%);
+      color: #e0e7ff;
+      font-family: 'Segoe UI', sans-serif;
+      overflow-x: hidden;
+    }
+    .astronaut {
+      animation: floatAstronaut 8s ease-in-out infinite;
+      filter: drop-shadow(0 15px 30px rgba(59, 130, 246, 0.6));
+    }
+    @keyframes floatAstronaut {
+      0%, 100% { transform: translateY(0) rotate(-8deg); }
+      50% { transform: translateY(-45px) rotate(8deg); }
+    }
+    .star { position: absolute; background: white; border-radius: 50%; animation: twinkle 5s infinite; }
+  </style>
+</head>
+<body class="min-h-screen relative">
+
+  <div id="stars" class="fixed inset-0 pointer-events-none"></div>
+
+  <!-- Floating Astronaut -->
+  <div class="fixed bottom-8 right-8 text-[180px] z-50 astronaut">🧑‍🚀</div>
+
+  <div class="max-w-4xl mx-auto p-6 relative z-10">
+
+    <!-- LOGIN PAGE -->
+    <div id="loginPage">
+      <div class="text-center py-12">
+        <h1 class="text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">StarGate VPN</h1>
+        <p class="text-blue-300 mt-2">Private Tunnel Through Space</p>
+      </div>
+
+      <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-10 border border-white/20 max-w-md mx-auto">
+        <h2 class="text-3xl font-semibold text-center mb-8">Login / Register</h2>
+        
+        <div class="space-y-5">
+          <input type="email" id="email" placeholder="Email Address" 
+                 class="w-full px-6 py-4 bg-white/10 border border-white/30 rounded-2xl focus:outline-none focus:border-blue-400">
+          
+          <input type="text" id="username" placeholder="Username" 
+                 class="w-full px-6 py-4 bg-white/10 border border-white/30 rounded-2xl focus:outline-none focus:border-blue-400">
+          
+          <input type="password" id="password" placeholder="Password" 
+                 class="w-full px-6 py-4 bg-white/10 border border-white/30 rounded-2xl focus:outline-none focus:border-blue-400">
+          
+          <button onclick="handleLogin()" 
+                  class="w-full py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl font-semibold text-lg">
+            Continue
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VERIFICATION -->
+    <div id="verifyPage" class="hidden">
+      <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-10 border border-white/20 max-w-md mx-auto mt-20">
+        <h2 class="text-2xl text-center mb-2">Email Verification</h2>
+        <p class="text-center text-gray-400 mb-8">Enter the 6-digit code sent to your email</p>
+        <input type="text" id="code" maxlength="6" placeholder="123456" 
+               class="w-full text-center text-3xl tracking-widest py-4 bg-white/10 border border-white/30 rounded-2xl">
+        <button onclick="verifyCode()" class="w-full mt-6 py-4 bg-green-500 rounded-2xl font-semibold">Verify</button>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="hidden">
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-4xl font-bold">Welcome back, <span id="usernameDisplay" class="text-blue-400"></span></h1>
+        <button onclick="logout()" class="text-red-400 hover:text-red-500 text-xl"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
+
+      <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20">
+        <h2 class="text-2xl mb-6">Your WireGuard Client</h2>
+        
+        <div id="noConfig" class="hidden">
+          <p class="text-yellow-400 mb-4">No config found for this email.</p>
+          <button onclick="generateConfig()" class="px-8 py-4 bg-green-600 rounded-2xl font-semibold">
+            Generate New Config
+          </button>
+        </div>
+
+        <div id="hasConfig" class="hidden">
+          <p class="text-green-400 mb-6">✅ You already have a configuration file.</p>
+          <button onclick="downloadConfig()" class="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl font-semibold flex items-center gap-3">
+            <i class="fas fa-download"></i> Download Config Again
+          </button>
+        </div>
+
+        <div class="mt-10 text-sm space-y-4">
+          <h3 class="font-semibold">How to Connect:</h3>
+          <ol class="list-decimal pl-5 space-y-2 text-gray-300">
+            <li>Download the <code>.conf</code> file</li>
+            <li>Install WireGuard app (Phone or PC)</li>
+            <li>Import the config file</li>
+            <li>Connect to <strong>StarGate VPN</strong></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Simulate database with localStorage
+    let currentUser = null;
+
+    function handleLogin() {
+      const email = document.getElementById('email').value.trim().toLowerCase();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (!email || !username || !password) {
+        alert("Please fill all fields");
+        return;
+      }
+
+      // Save user (simulating GitHub private repo user database)
+      currentUser = { email, username };
+      localStorage.setItem('stargate_users', JSON.stringify(currentUser));
+
+      document.getElementById('loginPage').classList.add('hidden');
+      document.getElementById('verifyPage').classList.remove('hidden');
+    }
+
+    function verifyCode() {
+      const code = document.getElementById('code').value;
+      if (code.length !== 6) {
+        alert("Please enter 6 digits");
+        return;
+      }
+
+      document.getElementById('verifyPage').classList.add('hidden');
+      document.getElementById('dashboard').classList.remove('hidden');
+      
+      document.getElementById('usernameDisplay').textContent = currentUser.username;
+      
+      checkUserHasConfig();
+    }
+
+    function checkUserHasConfig() {
+      const savedConfigs = JSON.parse(localStorage.getItem('stargate_configs') || '{}');
+      const hasConfig = savedConfigs[currentUser.email];
+
+      if (hasConfig) {
+        document.getElementById('hasConfig').classList.remove('hidden');
+      } else {
+        document.getElementById('noConfig').classList.remove('hidden');
+      }
+    }
+
+    function generateConfig() {
+      const savedConfigs = JSON.parse(localStorage.getItem('stargate_configs') || '{}');
+      
+      if (savedConfigs[currentUser.email]) {
+        alert("You already have a config file.");
+        return;
+      }
+
+      // Simulate config creation
+      savedConfigs[currentUser.email] = {
+        createdAt: new Date().toISOString(),
+        filename: `stargate-${currentUser.username}.conf`
+      };
+      
+      localStorage.setItem('stargate_configs', JSON.stringify(savedConfigs));
+      
+      alert("✅ New configuration generated successfully!");
+      location.reload();
+    }
+
+    function downloadConfig() {
+      const content = `# StarGate VPN - Private Tunnel
+# User: ${currentUser.username}
+# Email: ${currentUser.email}
+# Generated: ${new Date().toLocaleDateString()}
+
+[Interface]
+PrivateKey = YOUR_PRIVATE_KEY_HERE
+Address = 10.13.13.${Math.floor(Math.random()*200)+2}/32
+DNS = 1.1.1.1
+
+[Peer]
+PublicKey = SERVER_PUBLIC_KEY_HERE
+AllowedIPs = 0.0.0.0/0
+Endpoint = myvpn123.duckdns.org:51820
+PersistentKeepalive = 25`;
+
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `stargate-${currentUser.username}.conf`;
+      a.click();
+    }
+
+    function logout() {
+      if (confirm("Logout?")) location.reload();
+    }
+
+    // Create Stars
+    function createStars() {
+      const container = document.getElementById('stars');
+      for (let i = 0; i < 180; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        const size = Math.random() * 2.8 + 0.8;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        star.style.left = `${Math.random() * 100}vw`;
+        star.style.top = `${Math.random() * 100}vh`;
+        star.style.animationDelay = `-${Math.random() * 6}s`;
+        container.appendChild(star);
+      }
+    }
+
+    window.onload = createStars;
+  </script>
+</body>
+</html>
