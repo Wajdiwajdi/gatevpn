@@ -166,9 +166,20 @@
         });
 
         if (error) {
-          showMessage(`Error: ${error.message}`, true);
+          // Check for specific error messages
+          if (error.message && error.message.toLowerCase().includes('already')) {
+            showMessage("This email is already used", true);
+          } else if (error.message && error.message.toLowerCase().includes('invalid')) {
+            showMessage("Invalid email address", true);
+          } else {
+            showMessage(`Error: ${error.message}`, true);
+          }
         } else {
           showMessage("Account created! Check your email to confirm.");
+          // Clear fields
+          document.getElementById("signupEmail").value = '';
+          document.getElementById("signupPassword").value = '';
+          document.getElementById("confirmPassword").value = '';
           setTimeout(() => toggleForm(), 2000);
         }
       } catch (err) {
