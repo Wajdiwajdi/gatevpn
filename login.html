@@ -139,9 +139,9 @@
           password: "dummy_password_just_to_check"
         });
         if (error && error.message && error.message.toLowerCase().includes('invalid')) {
-          return true; 
+          return false; 
         }
-        return false;
+        return true;
       } catch (err) {
         return false;
       }
@@ -174,7 +174,7 @@
 
       try {
         const emailExists = await checkEmailExists(email);
-        if (!emailExists) {
+        if (emailExists) {
           showMessage("This email is already used", true);
           return;
         }
