@@ -53,16 +53,10 @@
   </style>
 </head>
 <body class="min-h-screen overflow-x-hidden bg-black">
-
-  <!-- Video Background -->
   <video autoplay muted loop playsinline class="fixed inset-0 w-full h-full object-cover z-0">
     <source src="space.mp4" type="video/mp4">
   </video>
-
-  <!-- Overlay -->
   <div class="fixed inset-0 bg-black/50 z-[1]"></div>
-
-  <!-- Stars Background -->
   <div id="stars" class="fixed inset-0 pointer-events-none z-10"></div>
 
   <div class="relative z-30">
@@ -119,13 +113,11 @@
   </div>
 
   <script>
-    // ================== SUPABASE CONFIG ==================
     const SUPABASE_URL = "https://rbmgzryxrtdnpqizxgob.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJibWd6cnl4cnRkbnBxaXp4Z29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MDY3MzgsImV4cCI6MjA5NjA4MjczOH0.-p8xJ_DOqoqzynian8rTHJqVZi2ZfZF4CAE-wzw2opo";
 
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Create Stars
     function createStars() {
       const container = document.getElementById('stars');
       for (let i = 0; i < 180; i++) {
@@ -155,17 +147,14 @@
       msgEl.className = `message-box show ${isError ? 'error' : 'success'}`;
     }
 
-    // Check if email already exists
     async function checkEmailExists(email) {
       try {
         const { data, error } = await supabaseClient.auth.signInWithPassword({
           email,
           password: "dummy_password_just_to_check"
         });
-        
-        // If we get an error about invalid credentials, email exists
         if (error && error.message && error.message.toLowerCase().includes('invalid')) {
-          return true; // Email exists
+          return true; 
         }
         return false;
       } catch (err) {
@@ -173,7 +162,6 @@
       }
     }
 
-    // Sign Up
     async function signUp() {
       const email = document.getElementById("signupEmail").value.trim();
       const password = document.getElementById("signupPassword").value.trim();
@@ -193,8 +181,6 @@
         showMessage("Password must be at least 6 characters", true);
         return;
       }
-
-      // Check email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         showMessage("Invalid email address", true);
@@ -202,14 +188,12 @@
       }
 
       try {
-        // First check if email exists
         const emailExists = await checkEmailExists(email);
         if (emailExists) {
           showMessage("This email is already used", true);
           return;
         }
 
-        // If email doesn't exist, proceed with signup
         const { data, error } = await supabaseClient.auth.signUp({ 
           email, 
           password,
@@ -219,7 +203,6 @@
         });
 
         if (error) {
-          // Double check for email already exists error
           if (error.message && (error.message.toLowerCase().includes('already') || error.message.toLowerCase().includes('exists'))) {
             showMessage("This email is already used", true);
           } else if (error.message && error.message.toLowerCase().includes('invalid')) {
@@ -229,7 +212,6 @@
           }
         } else {
           showMessage("✓ Account created! Check your email to confirm.");
-          // Clear fields
           document.getElementById("signupEmail").value = '';
           document.getElementById("signupPassword").value = '';
           document.getElementById("confirmPassword").value = '';
@@ -240,7 +222,6 @@
       }
     }
 
-    // Sign In
     async function signIn() {
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
@@ -273,7 +254,6 @@
       }
     }
 
-    // Auto redirect if already logged in
     window.onload = async () => {
       createStars();
       try {
