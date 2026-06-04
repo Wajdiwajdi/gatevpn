@@ -155,6 +155,24 @@
       msgEl.className = `message-box show ${isError ? 'error' : 'success'}`;
     }
 
+    // Check if email already exists
+    async function checkEmailExists(email) {
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+          email,
+          password: "dummy_password_just_to_check"
+        });
+        
+        // If we get an error about invalid credentials, email exists
+        if (error && error.message && error.message.toLowerCase().includes('invalid')) {
+          return true; // Email exists
+        }
+        return false;
+      } catch (err) {
+        return false;
+      }
+    }
+
     // Sign Up
     async function signUp() {
       const email = document.getElementById("signupEmail").value.trim();
@@ -176,7 +194,22 @@
         return;
       }
 
+      // Check email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showMessage("Invalid email address", true);
+        return;
+      }
+
       try {
+        // First check if email exists
+        const emailExists = await checkEmailExists(email);
+        if (emailExists) {
+          showMessage("This email is already used", true);
+          return;
+        }
+
+        // If email doesn't exist, proceed with signup
         const { data, error } = await supabaseClient.auth.signUp({ 
           email, 
           password,
@@ -186,8 +219,8 @@
         });
 
         if (error) {
-          // Check for specific error messages
-          if (error.message && error.message.toLowerCase().includes('already')) {
+          // Double check for email already exists error
+          if (error.message && (error.message.toLowerCase().includes('already') || error.message.toLowerCase().includes('exists'))) {
             showMessage("This email is already used", true);
           } else if (error.message && error.message.toLowerCase().includes('invalid')) {
             showMessage("Invalid email address", true);
@@ -195,7 +228,7 @@
             showMessage(`Error: ${error.message}`, true);
           }
         } else {
-          showMessage("Account created! Check your email to confirm.");
+          showMessage("✓ Account created! Check your email to confirm.");
           // Clear fields
           document.getElementById("signupEmail").value = '';
           document.getElementById("signupPassword").value = '';
@@ -224,9 +257,13 @@
         });
 
         if (error) {
-          showMessage(`Error: ${error.message}`, true);
+          if (error.message && error.message.toLowerCase().includes('invalid')) {
+            showMessage("Invalid email or password", true);
+          } else {
+            showMessage(`Error: ${error.message}`, true);
+          }
         } else {
-          showMessage("Login successful! Redirecting...");
+          showMessage("✓ Login successful! Redirecting...");
           setTimeout(() => {
             window.location.href = 'index.html';
           }, 1500);
