@@ -26,6 +26,45 @@
     video {
       filter: brightness(0.65);
     }
+    .guide-box {
+      background: rgba(59, 130, 246, 0.1);
+      border-left: 4px solid #3b82f6;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+    .guide-title {
+      font-weight: 600;
+      color: #60a5fa;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .guide-steps {
+      font-size: 14px;
+      color: #d1d5db;
+      line-height: 1.6;
+    }
+    .guide-step {
+      margin-bottom: 8px;
+      padding-left: 20px;
+      position: relative;
+    }
+    .guide-step:before {
+      content: attr(data-number);
+      position: absolute;
+      left: 0;
+      width: 18px;
+      height: 18px;
+      background: #3b82f6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body class="min-h-screen overflow-x-hidden bg-black">
@@ -56,8 +95,37 @@
 
         <div class="glass rounded-3xl p-8">
           <h3 class="text-2xl mb-6">Your WireGuard Config</h3>
+          
+          <!-- Guide Section -->
+          <div class="guide-box">
+            <div class="guide-title">
+              <i class="fas fa-book"></i>
+              How to Use Your WireGuard Config
+            </div>
+            <div class="guide-steps">
+              <div class="guide-step" data-number="1">
+                <strong>Download WireGuard</strong> - Install WireGuard on your device from <a href="https://www.wireguard.com/install/" target="_blank" class="text-cyan-400 hover:underline">wireguard.com</a>
+              </div>
+              <div class="guide-step" data-number="2">
+                <strong>Generate Config</strong> - Click the button below to generate your configuration file
+              </div>
+              <div class="guide-step" data-number="3">
+                <strong>Copy Config</strong> - Copy the entire config text (starting with [Interface])
+              </div>
+              <div class="guide-step" data-number="4">
+                <strong>Import to WireGuard</strong> - Open WireGuard, create new tunnel, paste the config
+              </div>
+              <div class="guide-step" data-number="5">
+                <strong>Update Keys</strong> - Replace YOUR_PRIVATE_KEY_HERE and SERVER_PUBLIC_KEY_HERE with your actual keys
+              </div>
+              <div class="guide-step" data-number="6">
+                <strong>Connect</strong> - Activate the tunnel and you're connected to your VPN!
+              </div>
+            </div>
+          </div>
+
           <button onclick="generateConfig()" 
-            class="w-full bg-green-600 hover:bg-green-700 p-4 rounded-2xl font-semibold text-lg mb-6">
+            class="w-full bg-green-600 hover:bg-green-700 p-4 rounded-2xl font-semibold text-lg mb-6 transition">
             Generate New 24/7 Config
           </button>
           <pre id="output" class="bg-black/60 p-6 rounded-2xl text-sm overflow-auto max-h-96 text-gray-300"></pre>
