@@ -61,91 +61,97 @@ export default function App() {
   // ---------------- LOGIN SCREEN ----------------
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+      <div className="min-h-screen w-full relative overflow-hidden flex items-center justify-center px-4">
 
-        {/* BACKGROUND VIDEO */}
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-        >
-          <source src="/space.mp4" type="video/mp4" />
-        </video>
+  {/* 🌌 SPACE VIDEO BACKGROUND */}
+  <video
+    autoPlay
+    muted
+    loop
+    playsInline
+    className="absolute inset-0 w-full h-full object-cover"
+  >
+    <source src="/space.mp4" type="video/mp4" />
+  </video>
 
-        <div className="absolute inset-0 bg-black/70"></div>
+  {/* DARK SPACE OVERLAY */}
+  <div className="absolute inset-0 bg-black/60"></div>
 
-        {/* LOGIN CARD */}
-        <div className="relative z-10 glass p-10 rounded-3xl text-center max-w-md w-full">
+  {/* LOGIN CARD */}
+  <div className="relative z-10 glass w-full max-w-md p-10 rounded-3xl text-center">
 
-          <h1 className="glow-title text-5xl mb-4">
-            StarGate VPN
-          </h1>
+    <h1 className="glow-title text-5xl font-bold mb-2">
+      StarGate VPN
+    </h1>
 
-          <p className="text-cyan-300 mb-8">
-            Secure Space Tunnel Access
-          </p>
+    <p className="text-cyan-300 mb-8">
+      Enter the Quantum Tunnel
+    </p>
 
-          <button
-            onClick={signInWithGoogle}
-            className="bg-white text-black px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transition w-full"
-          >
-            Continue with Google
-          </button>
+    <input
+      className="input-field w-full p-4 rounded-xl mb-4 text-white"
+      placeholder="Email"
+    />
 
-          <p className="text-gray-400 text-sm mt-4">
-            Only Google accounts are supported
-          </p>
+    <input
+      className="input-field w-full p-4 rounded-xl mb-6 text-white"
+      placeholder="Password"
+      type="password"
+    />
 
-        </div>
-      </div>
+    <button className="btn-glow w-full py-4 rounded-xl font-semibold">
+      Continue
+    </button>
+
+    <p className="text-gray-400 text-xs mt-4">
+      Secure encrypted access to StarGate network
+    </p>
+
+  </div>
+</div>
     )
   }
 
   // ---------------- DASHBOARD ----------------
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+  <div className="min-h-screen w-full relative overflow-hidden flex items-center justify-center px-4">
 
-      {/* BACKGROUND */}
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="absolute inset-0 w-full h-full object-cover"
-      >
-        <source src="/space.mp4" type="video/mp4" />
-      </video>
+  {/* 🌌 SPACE VIDEO BACKGROUND */}
+  <video
+    autoPlay
+    muted
+    loop
+    playsInline
+    className="absolute inset-0 w-full h-full object-cover"
+  >
+    <source src="/space.mp4" type="video/mp4" />
+  </video>
 
-      <div className="absolute inset-0 bg-black/80"></div>
+  {/* DARK OVERLAY */}
+  <div className="absolute inset-0 bg-black/70"></div>
 
-      {/* DASHBOARD CARD */}
-      <div className="relative z-10 glass p-10 rounded-3xl text-center w-full max-w-md">
+  {/* DASHBOARD CARD */}
+  <div className="relative z-10 glass w-full max-w-lg p-10 rounded-3xl">
 
-        {/* USER INFO */}
-        <img
-          src={user.user_metadata?.avatar_url}
-          className="w-20 h-20 rounded-full mx-auto mb-4 border border-cyan-400"
-        />
+    <h2 className="glow-title text-3xl mb-6 text-center">
+      StarGate Control Panel
+    </h2>
 
-        <h2 className="text-xl text-white mb-2">
-          Welcome
-        </h2>
-
-        <p className="text-cyan-300 mb-6">
-          {user.email}
-        </p>
-
-        {/* LOGOUT */}
-        <button
-          onClick={logout}
-          className="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-xl text-white w-full"
-        >
-          Logout
-        </button>
-
-      </div>
+    <div className="space-y-3 text-gray-300 mb-6 text-sm">
+      <p>⚡ Quantum encrypted tunnel active</p>
+      <p>🌌 Secure routing enabled</p>
+      <p>🔐 Identity verified via Supabase</p>
     </div>
+
+    <button className="btn-glow w-full py-4 rounded-xl mb-4">
+      Download VPN Config
+    </button>
+
+    <button className="w-full py-4 rounded-xl bg-red-500/80 hover:bg-red-600 transition">
+      Disconnect
+    </button>
+
+  </div>
+</div>
   )
 }
