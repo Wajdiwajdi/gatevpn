@@ -176,16 +176,16 @@
         const emailExists = await checkEmailExists(email);
         if (emailExists) {
           showMessage("This email is already used", true);
-          return;
-        }
-
-        const { data, error } = await supabaseClient.auth.signUp({ 
+           const { data, error } = await supabaseClient.auth.signUp({ 
           email, 
           password,
           options: {
             emailRedirectTo: window.location.origin
           }
         });
+        }
+
+       
 
         if (error) {
           if (error.message && (error.message.toLowerCase().includes('already') || error.message.toLowerCase().includes('exists'))) {
