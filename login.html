@@ -29,13 +29,6 @@
     video {
       filter: brightness(0.65);
     }
-    .astronaut {
-      animation: float 8s ease-in-out infinite;
-    }
-    @keyframes float {
-      0%, 100% { transform: translateY(0) rotate(-5deg); }
-      50% { transform: translateY(-40px) rotate(5deg); }
-    }
   </style>
 </head>
 <body class="min-h-screen overflow-x-hidden bg-black">
@@ -51,9 +44,6 @@
   <!-- Stars Background -->
   <div id="stars" class="fixed inset-0 pointer-events-none z-10"></div>
 
-  <!-- Floating Astronaut -->
-  <div class="fixed bottom-10 right-10 text-[160px] z-20 astronaut">🧑‍🚀</div>
-
   <div class="relative z-30">
     <!-- AUTH PAGE -->
     <div class="min-h-screen flex items-center justify-center p-6">
@@ -63,29 +53,54 @@
           <p class="text-cyan-300 mt-3">Private Tunnel Through Space</p>
         </div>
 
-        <input id="email" type="email" placeholder="Email Address"
-          class="w-full p-4 mb-4 rounded-2xl bg-black/30 border border-white/20 focus:border-cyan-400">
+        <div id="loginForm">
+          <input id="email" type="email" placeholder="Email Address"
+            class="w-full p-4 mb-4 rounded-2xl bg-black/30 border border-white/20 focus:border-cyan-400 text-white placeholder-gray-400">
 
-        <input id="password" type="password" placeholder="Password"
-          class="w-full p-4 mb-6 rounded-2xl bg-black/30 border border-white/20 focus:border-cyan-400">
+          <input id="password" type="password" placeholder="Password"
+            class="w-full p-4 mb-6 rounded-2xl bg-black/30 border border-white/20 focus:border-cyan-400 text-white placeholder-gray-400">
 
-        <button onclick="signIn()" 
-          class="w-full bg-blue-600 hover:bg-blue-700 p-4 rounded-2xl font-semibold text-lg mb-3">
-          Login
-        </button>
+          <button onclick="signIn()" 
+            class="w-full bg-blue-600 hover:bg-blue-700 p-4 rounded-2xl font-semibold text-lg mb-3 transition">
+            Login
+          </button>
 
-        <button onclick="signUp()" 
-          class="w-full bg-purple-600 hover:bg-purple-700 p-4 rounded-2xl font-semibold text-lg">
-          Register New Account
-        </button>
+          <button onclick="toggleForm()" 
+            class="w-full bg-purple-600 hover:bg-purple-700 p-4 rounded-2xl font-semibold text-lg transition">
+            Create New Account
+          </button>
+        </div>
+
+        <div id="signupForm" class="hidden">
+          <input id="signupEmail" type="email" placeholder="Email Address"
+            class="w-full p-4 mb-4 rounded-2xl bg-black/30 border border-white/20 focus:border-cyan-400 text-white placeholder-gray-400">
+
+          <input id="signupPassword" type="password" placeholder="Password"
+            class="w-full p-4 mb-4 rounded-2xl bg-black/30 border border-white/20 focus:border-cyan-400 text-white placeholder-gray-400">
+
+          <input id="confirmPassword" type="password" placeholder="Confirm Password"
+            class="w-full p-4 mb-6 rounded-2xl bg-black/30 border border-white/20 focus:border-cyan-400 text-white placeholder-gray-400">
+
+          <button onclick="signUp()" 
+            class="w-full bg-green-600 hover:bg-green-700 p-4 rounded-2xl font-semibold text-lg mb-3 transition">
+            Register
+          </button>
+
+          <button onclick="toggleForm()" 
+            class="w-full bg-gray-600 hover:bg-gray-700 p-4 rounded-2xl font-semibold text-lg transition">
+            Back to Login
+          </button>
+        </div>
+
+        <div id="message" class="mt-6 text-center text-sm hidden"></div>
       </div>
     </div>
   </div>
 
   <script>
     // ================== SUPABASE CONFIG ==================
-    const SUPABASE_URL = "https://rbmgzryxrtdnpqizxgob.supabase.co";      // ← CHANGE
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJibWd6cnl4cnRkbnBxaXp4Z29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MDY3MzgsImV4cCI6MjA5NjA4MjczOH0.-p8x[...]
+    const SUPABASE_URL = "https://rbmgzryxrtdnpqizxgob.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJibWd6cnl4cnRkbnBxaXp4Z29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MDY3MzgsImV4cCI6MjA5NjA4MjczOH0.-p8x[...]";
 
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -107,36 +122,99 @@
       }
     }
 
+    function toggleForm() {
+      document.getElementById('loginForm').classList.toggle('hidden');
+      document.getElementById('signupForm').classList.toggle('hidden');
+      document.getElementById('message').classList.add('hidden');
+    }
+
+    function showMessage(text, isError = false) {
+      const msgEl = document.getElementById('message');
+      msgEl.textContent = text;
+      msgEl.className = `mt-6 text-center text-sm ${isError ? 'text-red-400' : 'text-green-400'}`;
+      msgEl.classList.remove('hidden');
+    }
+
     // Sign Up
     async function signUp() {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
-      if (!email || !password) return alert("Please fill all fields");
+      const email = document.getElementById("signupEmail").value.trim();
+      const password = document.getElementById("signupPassword").value.trim();
+      const confirmPassword = document.getElementById("confirmPassword").value.trim();
 
-      const { error } = await supabaseClient.auth.signUp({ email, password });
-      if (error) alert(error.message);
-      else alert("Account created! You can now login.");
+      if (!email || !password || !confirmPassword) {
+        showMessage("Please fill all fields", true);
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showMessage("Passwords do not match", true);
+        return;
+      }
+
+      if (password.length < 6) {
+        showMessage("Password must be at least 6 characters", true);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabaseClient.auth.signUp({ 
+          email, 
+          password,
+          options: {
+            emailRedirectTo: window.location.origin
+          }
+        });
+
+        if (error) {
+          showMessage(`Error: ${error.message}`, true);
+        } else {
+          showMessage("Account created! Check your email to confirm.");
+          setTimeout(() => toggleForm(), 2000);
+        }
+      } catch (err) {
+        showMessage(`Error: ${err.message}`, true);
+      }
     }
 
     // Sign In
     async function signIn() {
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
-      if (!email || !password) return alert("Please fill all fields");
 
-      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-      if (error) return alert(error.message);
+      if (!email || !password) {
+        showMessage("Please fill all fields", true);
+        return;
+      }
 
-      // Redirect to dashboard after successful login
-      window.location.href = 'index.html';
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ 
+          email, 
+          password 
+        });
+
+        if (error) {
+          showMessage(`Error: ${error.message}`, true);
+        } else {
+          showMessage("Login successful! Redirecting...");
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1500);
+        }
+      } catch (err) {
+        showMessage(`Error: ${err.message}`, true);
+      }
     }
 
     // Auto redirect if already logged in
     window.onload = async () => {
       createStars();
-      const { data } = await supabaseClient.auth.getSession();
-      if (data.session) {
-        window.location.href = 'index.html';
+      try {
+        const { data } = await supabaseClient.auth.getSession();
+        if (data.session) {
+          window.location.href = 'index.html';
+        }
+      } catch (err) {
+        console.log('Session check error:', err);
       }
     };
   </script>
