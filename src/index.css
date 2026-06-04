@@ -2,69 +2,83 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
-body,
-#root {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
+/* ===== GLOBAL ===== */
 body {
-  overflow-x: hidden;
+  font-family: 'Segoe UI', system-ui, sans-serif;
   background: black;
-  font-family: 'Segoe UI', sans-serif;
+  overflow-x: hidden;
 }
 
+/* ===== STARFIELD BASE ===== */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(56,189,248,0.15), transparent 40%),
+    radial-gradient(circle at 80% 30%, rgba(168,85,247,0.15), transparent 40%),
+    radial-gradient(circle at 50% 80%, rgba(34,211,238,0.10), transparent 40%);
+  z-index: -2;
+}
+
+/* ===== GLASS 2.0 (INSANE UPGRADE) ===== */
 .glass {
-  background: rgba(15, 23, 42, 0.65);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-
-  border: 1px solid rgba(255,255,255,0.1);
-
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(25px);
+  border: 1px solid rgba(103, 232, 249, 0.15);
   box-shadow:
-    0 0 40px rgba(34,211,238,0.15),
-    0 0 80px rgba(168,85,247,0.15);
+    0 0 40px rgba(34,211,238,0.10),
+    0 0 80px rgba(168,85,247,0.08),
+    inset 0 0 30px rgba(255,255,255,0.05);
+  transition: 0.4s ease;
 }
 
-.glow-title {
-  background: linear-gradient(
-    90deg,
-    #67e8f9,
-    #22d3ee,
-    #a855f7,
-    #c026d3
-  );
+.glass:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow:
+    0 0 60px rgba(34,211,238,0.18),
+    0 0 120px rgba(168,85,247,0.12),
+    inset 0 0 40px rgba(255,255,255,0.08);
+}
 
+/* ===== TITLE GLOW ===== */
+.glow-title {
+  background: linear-gradient(90deg, #22d3ee, #a855f7, #60a5fa, #22d3ee);
+  background-size: 300% 300%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  animation: glowMove 6s ease infinite;
 }
 
+@keyframes glowMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ===== BUTTONS ===== */
+.btn-glow {
+  background: linear-gradient(135deg, #06b6d4, #3b82f6, #a855f7);
+  background-size: 200% 200%;
+  color: white;
+  transition: 0.3s;
+  box-shadow: 0 0 20px rgba(56,189,248,0.3);
+}
+
+.btn-glow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 40px rgba(56,189,248,0.6);
+  background-position: right center;
+}
+
+/* ===== INPUTS ===== */
 .input-field {
   background: rgba(0,0,0,0.4);
-  border: 1px solid rgba(255,255,255,0.15);
-  color: white;
+  border: 1px solid rgba(103,232,249,0.2);
+  transition: 0.3s;
 }
 
 .input-field:focus {
-  outline: none;
   border-color: #22d3ee;
-}
-
-.btn-login {
-  background: linear-gradient(
-    90deg,
-    #2563eb,
-    #3b82f6
-  );
-}
-
-.btn-register {
-  background: linear-gradient(
-    90deg,
-    #9333ea,
-    #c026d3
-  );
+  box-shadow: 0 0 20px rgba(34,211,238,0.2);
 }
