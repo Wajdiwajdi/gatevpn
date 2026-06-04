@@ -118,22 +118,7 @@
 
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    function createStars() {
-      const container = document.getElementById('stars');
-      for (let i = 0; i < 180; i++) {
-        const star = document.createElement('div');
-        star.style.position = 'absolute';
-        star.style.background = 'white';
-        star.style.borderRadius = '50%';
-        star.style.width = Math.random() * 3 + 'px';
-        star.style.height = star.style.width;
-        star.style.left = Math.random() * 100 + 'vw';
-        star.style.top = Math.random() * 100 + 'vh';
-        star.style.opacity = Math.random() * 0.8 + 0.3;
-        star.style.animation = `twinkle ${Math.random() * 4 + 3}s infinite`;
-        container.appendChild(star);
-      }
-    }
+    
 
     function toggleForm() {
       document.getElementById('loginForm').classList.toggle('hidden');
@@ -189,7 +174,7 @@
 
       try {
         const emailExists = await checkEmailExists(email);
-        if (emailExists) {
+        if (!emailExists) {
           showMessage("This email is already used", true);
           return;
         }
