@@ -9,23 +9,35 @@ const supabase = createClient(
 export default function App() {
   const [user, setUser] = useState(null)
   const [message, setMessage] = useState('')
-  const [messageType, setMessageType] = useState('')
 
-  // 🔄 session
+  // ======================
+  // AUTH LISTENER
+  // ======================
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setUser(data.session?.user ?? null)
-    })
+    const init = async () => {
+      const { data } = await supabase.auth.getSession()
+      const u = data.session?.user ?? null
+      setUser(u)
+
+      if (u) await assignVpnConfig(u)
+    }
+
+    init()
 
     const { data: { subscription } } =
-      supabase.auth.onAuthStateChange((_, session) => {
-        setUser(session?.user ?? null)
+      supabase.auth.onAuthStateChange(async (_event, session) => {
+        const u = session?.user ?? null
+        setUser(u)
+
+        if (u) await assignVpnConfig(u)
       })
 
     return () => subscription.unsubscribe()
   }, [])
 
-  // 🔐 Google login
+  // ======================
+  // GOOGLE LOGIN
+  // ======================
   const loginWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -35,13 +47,61 @@ export default function App() {
     })
   }
 
-  // 🚪 logout
+  // ======================
+  // LOGOUT
+  // ======================
   const logout = async () => {
     await supabase.auth.signOut()
     setUser(null)
+    setMessage('')
   }
 
-  // 📥 DOWNLOAD CONFIG (FIXED)
+  // ======================
+  // AUTO ASSIGN VPN CONFIG
+  // ======================
+  const assignVpnConfig = async (user) => {
+    if (!user) return
+
+    // check if already assigned
+    const { data: existing } = await supabase
+      .from('vpn_users')
+      .select('*')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (existing) return
+
+    // get free config
+    const { data: pool } = await supabase
+      .from('vpn_pool')
+      .select('config_file')
+      .eq('assigned', false)
+      .limit(1)
+      .maybeSingle()
+
+    if (!pool) {
+      setMessage('⚠️ No VPN configs available')
+      return
+    }
+
+    // mark as assigned
+    await supabase
+      .from('vpn_pool')
+      .update({ assigned: true })
+      .eq('config_file', pool.config_file)
+
+    // assign to user
+    await supabase.from('vpn_users').insert({
+      user_id: user.id,
+      config_file: pool.config_file,
+    })
+
+    setMessage('🚀 VPN Config assigned successfully')
+  }
+
+  // ======================
+  // DOWNLOAD CONFIG
+  // ======================
   const downloadConfig = async () => {
     if (!user) return
 
@@ -49,11 +109,10 @@ export default function App() {
       .from('vpn_users')
       .select('config_file')
       .eq('user_id', user.id)
-      .single()
+      .maybeSingle()
 
     if (error || !data) {
       setMessage('No VPN config assigned')
-      setMessageType('error')
       return
     }
 
@@ -62,8 +121,7 @@ export default function App() {
       .download(data.config_file)
 
     if (dlError || !file) {
-      setMessage('File not found')
-      setMessageType('error')
+      setMessage('File not found in storage')
       return
     }
 
@@ -79,8 +137,7 @@ export default function App() {
 
     URL.revokeObjectURL(url)
 
-    setMessage('Download started 🚀')
-    setMessageType('success')
+    setMessage('📥 Download started')
   }
 
   // ======================
@@ -114,7 +171,7 @@ export default function App() {
           </button>
 
           <p className="text-gray-400 text-xs mt-6">
-            Only Google accounts are allowed
+            Only Google accounts allowed
           </p>
 
         </div>
@@ -141,9 +198,9 @@ export default function App() {
         </h2>
 
         <div className="text-gray-300 text-sm space-y-2 mb-6">
-          <p>⚡ Secure tunnel: ACTIVE</p>
+          <p>⚡ Tunnel: ACTIVE</p>
           <p>🔐 User: {user.email}</p>
-          <p>🌌 Encryption: QUANTUM-LEVEL</p>
+          <p>🌌 Status: QUANTUM SECURE</p>
         </div>
 
         <button
@@ -154,14 +211,14 @@ export default function App() {
         </button>
 
         {message && (
-          <p className="text-center text-sm mb-3 text-cyan-300">
+          <p className="text-center text-cyan-300 text-sm mb-3">
             {message}
           </p>
         )}
 
         <button
           onClick={logout}
-          className="w-full py-3 rounded-xl bg-red-500/80 hover:bg-red-600 transition"
+          className="w-full py-3 rounded-xl bg-red-500/80 hover:bg-red-600"
         >
           Logout
         </button>
