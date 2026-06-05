@@ -10,7 +10,7 @@ const supabase = createClient(
 // ======================
 // 🔐 LOGIN PAGE
 // ======================
-function Login({ onLogin }) {
+function Login() {
   const loginWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -23,18 +23,26 @@ function Login({ onLogin }) {
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
 
+      {/* SPACE BACKGROUND */}
       <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
         <source src="/space.mp4" type="video/mp4" />
       </video>
 
       <div className="absolute inset-0 bg-black/60"></div>
 
+      {/* LOGIN CARD */}
       <div className="relative z-10 glass p-10 rounded-3xl text-center max-w-md w-full">
 
-        <h1 className="glow-title text-5xl mb-3">StarGate VPN</h1>
+        <h1 className="glow-title text-5xl mb-3">
+          StarGate VPN
+        </h1>
 
-        <p className="text-cyan-300 mb-8">
-          Secure Quantum Access Portal
+        <p className="text-cyan-300 mb-2">
+          Secure Quantum Tunnel Access
+        </p>
+
+        <p className="text-gray-400 text-sm mb-8">
+          Connect to your private encrypted gateway in seconds
         </p>
 
         <button
@@ -43,6 +51,10 @@ function Login({ onLogin }) {
         >
           Continue with Google
         </button>
+
+        <p className="text-gray-500 text-xs mt-6">
+          Only verified Google accounts can access the network
+        </p>
 
       </div>
     </div>
@@ -54,19 +66,15 @@ function Login({ onLogin }) {
 // 🌌 DASHBOARD
 // ======================
 function Dashboard({ user, onLogout }) {
-  const [message, setMessage] = useState('')
   const [configFile, setConfigFile] = useState(null)
+  const [message, setMessage] = useState('')
 
   // ======================
-  // ASSIGN VPN
+  // ASSIGN VPN (silent)
   // ======================
   const assignVpn = async () => {
-    if (!user) return
-
-    // sync pool from storage
     await supabase.rpc('sync_vpn_pool')
 
-    // check existing
     const { data: existing } = await supabase
       .from('vpn_users')
       .select('config_file')
@@ -78,44 +86,34 @@ function Dashboard({ user, onLogout }) {
       return
     }
 
-    // assign new
     const { data, error } = await supabase.rpc('assign_vpn_config', {
       uid: user.id
     })
 
-    if (error) {
-      console.log(error)
-      setMessage('Assignment error')
-      return
-    }
-
-    if (data === 'NO_FILES') {
-      setMessage('No VPN configs available')
+    if (error || data === 'NO_FILES') {
+      setMessage('⚠️ No VPN servers available right now')
       return
     }
 
     setConfigFile(data)
-    setMessage('VPN Assigned: ' + data)
+    setMessage('') // no annoying assignment message anymore
   }
 
   // ======================
-  // DOWNLOAD
+  // DOWNLOAD CONFIG
   // ======================
   const downloadConfig = async () => {
     if (!configFile) {
-      setMessage('No config assigned yet')
+      setMessage('No configuration assigned yet')
       return
     }
-
-    console.log("Downloading file:", configFile)
 
     const { data, error } = await supabase.storage
       .from('vpn-configs')
       .download(configFile)
 
     if (error || !data) {
-      console.log("Storage error:", error)
-      setMessage('File not found in storage: ' + configFile)
+      setMessage('Unable to retrieve VPN config file')
       return
     }
 
@@ -131,10 +129,9 @@ function Dashboard({ user, onLogout }) {
 
     URL.revokeObjectURL(url)
 
-    setMessage('Download started 🚀')
+    setMessage('Secure tunnel file downloaded successfully 🚀')
   }
 
-  // auto assign on load
   useEffect(() => {
     assignVpn()
   }, [])
@@ -142,44 +139,68 @@ function Dashboard({ user, onLogout }) {
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
 
+      {/* BACKGROUND */}
       <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
         <source src="/space.mp4" type="video/mp4" />
       </video>
 
       <div className="absolute inset-0 bg-black/70"></div>
 
+      {/* CARD */}
       <div className="relative z-10 glass p-10 rounded-3xl max-w-lg w-full">
 
-        <h2 className="glow-title text-3xl mb-6 text-center">
-          Control Panel
+        <h2 className="glow-title text-3xl mb-4 text-center">
+          StarGate Control Panel
         </h2>
 
-        <p className="text-gray-300 mb-3">
-          User: {user.email}
+        <p className="text-gray-300 text-sm mb-2">
+          Welcome, {user.email}
         </p>
 
-        {configFile && (
-          <p className="text-cyan-300 text-sm mb-3">
-            Assigned file: {configFile}
-          </p>
-        )}
+        <p className="text-cyan-300 text-xs mb-6">
+          Your encrypted tunnel is ready. Download your configuration below.
+        </p>
 
+        {/* DOWNLOAD */}
         <button
           onClick={downloadConfig}
           className="btn-glow w-full py-4 rounded-xl mb-4"
         >
-          Download VPN Config
+          Download WireGuard Config
         </button>
 
+        {/* MESSAGE */}
         {message && (
-          <p className="text-center text-cyan-300 text-sm mb-3">
+          <p className="text-center text-cyan-300 text-sm mb-4">
             {message}
           </p>
         )}
 
+        {/* ======================
+            📘 GUIDE SECTION
+        ====================== */}
+        <div className="bg-black/30 p-4 rounded-xl text-sm text-gray-300 space-y-2 mb-6">
+
+          <h3 className="text-cyan-300 font-semibold">
+            📘 How to use WireGuard
+          </h3>
+
+          <p>1. Install WireGuard app on your device (Windows / Android / iOS / Linux)</p>
+
+          <p>2. Open WireGuard and click <b>“Import tunnel”</b></p>
+
+          <p>3. Select the downloaded <b>stargate-vpn.conf</b> file</p>
+
+          <p>4. Activate the tunnel switch</p>
+
+          <p>5. You are now connected to the StarGate network 🚀</p>
+
+        </div>
+
+        {/* LOGOUT */}
         <button
           onClick={onLogout}
-          className="w-full bg-red-500 py-3 rounded-xl"
+          className="w-full bg-red-500/80 hover:bg-red-600 py-3 rounded-xl transition"
         >
           Logout
         </button>
