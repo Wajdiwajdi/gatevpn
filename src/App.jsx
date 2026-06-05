@@ -121,7 +121,7 @@ export default function App() {
           <p>🌌 Encryption: QUANTUM-LEVEL</p>
         </div>
 
-        <button onClick ={console.log("hi")}className="btn-glow w-full py-4 rounded-xl mb-4">
+        <button onClick={console.log("hi")} className="btn-glow w-full py-4 rounded-xl mb-4">
           Download VPN Config
         </button>
 
