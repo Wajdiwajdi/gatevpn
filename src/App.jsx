@@ -11,7 +11,7 @@ export default function App() {
   const [message, setMessage] = useState('')
 
   // ======================
-  // AUTH LISTENER
+  // INIT AUTH
   // ======================
   useEffect(() => {
     const init = async () => {
@@ -42,8 +42,8 @@ export default function App() {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin,
-      },
+        redirectTo: window.location.origin
+      }
     })
   }
 
@@ -57,34 +57,39 @@ export default function App() {
   }
 
   // ======================
-  // AUTO ASSIGN VPN CONFIG
+  // AUTO ASSIGN CONFIG
   // ======================
   const assignVpnConfig = async (user) => {
     if (!user) return
 
-    // check if already assigned
+    console.log("Assigning VPN for:", user.id)
+
+    // already assigned?
     const { data: existing } = await supabase
       .from('vpn_users')
-      .select('*')
+      .select('config_file')
       .eq('user_id', user.id)
       .maybeSingle()
 
-    if (existing) return
+    if (existing) {
+      console.log("Already assigned:", existing.config_file)
+      return
+    }
 
     // get free config
-    const { data: pool } = await supabase
+    const { data: pool, error } = await supabase
       .from('vpn_pool')
       .select('config_file')
       .eq('assigned', false)
       .limit(1)
       .maybeSingle()
 
-    if (!pool) {
+    if (error || !pool) {
       setMessage('⚠️ No VPN configs available')
       return
     }
 
-    // mark as assigned
+    // mark as used
     await supabase
       .from('vpn_pool')
       .update({ assigned: true })
@@ -93,7 +98,7 @@ export default function App() {
     // assign to user
     await supabase.from('vpn_users').insert({
       user_id: user.id,
-      config_file: pool.config_file,
+      config_file: pool.config_file
     })
 
     setMessage('🚀 VPN Config assigned successfully')
@@ -145,7 +150,7 @@ export default function App() {
   // ======================
   if (!user) {
     return (
-      <div className="min-h-screen w-full relative overflow-hidden flex items-center justify-center px-4">
+      <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden">
 
         <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
           <source src="/space.mp4" type="video/mp4" />
@@ -183,7 +188,7 @@ export default function App() {
   // DASHBOARD
   // ======================
   return (
-    <div className="min-h-screen w-full relative overflow-hidden flex items-center justify-center px-4">
+    <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden">
 
       <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
         <source src="/space.mp4" type="video/mp4" />
