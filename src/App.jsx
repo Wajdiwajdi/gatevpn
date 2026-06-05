@@ -40,7 +40,43 @@ export default function App() {
     setUser(null)
   }
 
-  const hi = async () =>{console.log("hi")}
+  const downloadConfig = async () => {
+  const { data, error } = await supabase
+    .from('vpn_users')
+    .select('config_file')
+    .eq('user_id', user.id)
+    .single()
+
+  if (error || !data) {
+    setMessage('No VPN config assigned')
+    setMessageType('error')
+    return
+  }
+
+  const { data: file, error: dlError } = await supabase.storage
+    .from('vpn-configs')
+    .download(data.config_file)
+
+  if (dlError || !file) {
+    setMessage('File not found')
+    return
+  }
+
+  const text = await file.text()
+
+  const blob = new Blob([text], { type: 'text/plain' })
+  const url = URL.createObjectURL(blob)
+
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'stargate-vpn.conf'
+  a.click()
+
+  URL.revokeObjectURL(url)
+
+  setMessage('Download started')
+  setMessageType('success')
+}
   // ======================
   // 🔒 LOGIN PAGE
   // ======================
@@ -122,7 +158,7 @@ export default function App() {
           <p>🌌 Encryption: QUANTUM-LEVEL</p>
         </div>
 
-        <button onClick={hi} className="btn-glow w-full py-4 rounded-xl mb-4">
+        <button onClick={downloadConfig} className="btn-glow w-full py-4 rounded-xl mb-4">
           Download VPN Config
         </button>
 
