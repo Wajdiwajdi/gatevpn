@@ -11,7 +11,7 @@ export default function App() {
   const [message, setMessage] = useState('')
 
   // ======================
-  // INIT AUTH
+  // AUTH INIT
   // ======================
   useEffect(() => {
     const init = async () => {
@@ -19,7 +19,7 @@ export default function App() {
       const u = data.session?.user ?? null
       setUser(u)
 
-      if (u) await assignVpnConfig(u)
+      if (u) await assignVpn(u)
     }
 
     init()
@@ -29,7 +29,7 @@ export default function App() {
         const u = session?.user ?? null
         setUser(u)
 
-        if (u) await assignVpnConfig(u)
+        if (u) await assignVpn(u)
       })
 
     return () => subscription.unsubscribe()
@@ -41,9 +41,7 @@ export default function App() {
   const loginWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: window.location.origin
-      }
+      options: { redirectTo: window.location.origin }
     })
   }
 
@@ -57,51 +55,40 @@ export default function App() {
   }
 
   // ======================
-  // AUTO ASSIGN CONFIG
+  // AUTO SYNC + ASSIGN
   // ======================
-  const assignVpnConfig = async (user) => {
+  const assignVpn = async (user) => {
     if (!user) return
 
-    console.log("Assigning VPN for:", user.id)
+    // 1. sync storage → pool
+    await supabase.rpc('sync_vpn_pool')
 
-    // already assigned?
+    // 2. check if already assigned
     const { data: existing } = await supabase
       .from('vpn_users')
       .select('config_file')
       .eq('user_id', user.id)
       .maybeSingle()
 
-    if (existing) {
-      console.log("Already assigned:", existing.config_file)
+    if (existing) return
+
+    // 3. assign file
+    const { data, error } = await supabase.rpc('assign_vpn_config', {
+      uid: user.id
+    })
+
+    if (error) {
+      console.log(error)
+      setMessage('Assignment error')
       return
     }
 
-    // get free config
-    const { data: pool, error } = await supabase
-      .from('vpn_pool')
-      .select('config_file')
-      .eq('assigned', false)
-      .limit(1)
-      .maybeSingle()
-
-    if (error || !pool) {
+    if (data === 'NO_FILES') {
       setMessage('⚠️ No VPN configs available')
       return
     }
 
-    // mark as used
-    await supabase
-      .from('vpn_pool')
-      .update({ assigned: true })
-      .eq('config_file', pool.config_file)
-
-    // assign to user
-    await supabase.from('vpn_users').insert({
-      user_id: user.id,
-      config_file: pool.config_file
-    })
-
-    setMessage('🚀 VPN Config assigned successfully')
+    setMessage('🚀 Assigned: ' + data)
   }
 
   // ======================
@@ -117,7 +104,7 @@ export default function App() {
       .maybeSingle()
 
     if (error || !data) {
-      setMessage('No VPN config assigned')
+      setMessage('No config assigned')
       return
     }
 
@@ -126,7 +113,7 @@ export default function App() {
       .download(data.config_file)
 
     if (dlError || !file) {
-      setMessage('File not found in storage')
+      setMessage('File missing in storage')
       return
     }
 
@@ -146,11 +133,11 @@ export default function App() {
   }
 
   // ======================
-  // LOGIN PAGE
+  // LOGIN UI
   // ======================
   if (!user) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden">
+      <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
 
         <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
           <source src="/space.mp4" type="video/mp4" />
@@ -158,26 +145,20 @@ export default function App() {
 
         <div className="absolute inset-0 bg-black/60"></div>
 
-        <div className="relative z-10 glass w-full max-w-md p-10 rounded-3xl text-center">
+        <div className="relative z-10 glass p-10 rounded-3xl text-center max-w-md w-full">
 
-          <h1 className="glow-title text-5xl font-bold mb-3">
-            StarGate VPN
-          </h1>
+          <h1 className="glow-title text-5xl mb-3">StarGate VPN</h1>
 
           <p className="text-cyan-300 mb-8">
-            Secure Quantum Access Portal
+            Quantum Secure Access
           </p>
 
           <button
             onClick={loginWithGoogle}
-            className="btn-glow w-full py-4 rounded-xl font-semibold text-lg"
+            className="btn-glow w-full py-4 rounded-xl"
           >
             Continue with Google
           </button>
-
-          <p className="text-gray-400 text-xs mt-6">
-            Only Google accounts allowed
-          </p>
 
         </div>
       </div>
@@ -188,7 +169,7 @@ export default function App() {
   // DASHBOARD
   // ======================
   return (
-    <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
 
       <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
         <source src="/space.mp4" type="video/mp4" />
@@ -196,17 +177,15 @@ export default function App() {
 
       <div className="absolute inset-0 bg-black/70"></div>
 
-      <div className="relative z-10 glass w-full max-w-lg p-10 rounded-3xl">
+      <div className="relative z-10 glass p-10 rounded-3xl max-w-lg w-full">
 
         <h2 className="glow-title text-3xl mb-6 text-center">
-          StarGate Control Panel
+          Control Panel
         </h2>
 
-        <div className="text-gray-300 text-sm space-y-2 mb-6">
-          <p>⚡ Tunnel: ACTIVE</p>
-          <p>🔐 User: {user.email}</p>
-          <p>🌌 Status: QUANTUM SECURE</p>
-        </div>
+        <p className="text-gray-300 mb-4">
+          User: {user.email}
+        </p>
 
         <button
           onClick={downloadConfig}
@@ -216,14 +195,14 @@ export default function App() {
         </button>
 
         {message && (
-          <p className="text-center text-cyan-300 text-sm mb-3">
+          <p className="text-cyan-300 text-center mb-3 text-sm">
             {message}
           </p>
         )}
 
         <button
           onClick={logout}
-          className="w-full py-3 rounded-xl bg-red-500/80 hover:bg-red-600"
+          className="w-full bg-red-500 py-3 rounded-xl"
         >
           Logout
         </button>
