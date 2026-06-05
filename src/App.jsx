@@ -3,28 +3,29 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
   'https://rbmgzryxrtdnpqizxgob.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJibWd6cnl4cnRkbnBxaXp4Z29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MDY3MzgsImV4cCI6MjA5NjA4MjczOH0.-p8xJ_DOqoqzynian8rTHJqVZi2ZfZF4CAE-wzw2opo'
+  'YOUR_ANON_KEY_HERE'
 )
 
 export default function App() {
   const [user, setUser] = useState(null)
+  const [message, setMessage] = useState('')
+  const [messageType, setMessageType] = useState('')
 
-  // 🔄 Load session + listen changes
+  // 🔄 session
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setUser(data.session?.user ?? null)
     })
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_, session) => {
-      setUser(session?.user ?? null)
-    })
+    const { data: { subscription } } =
+      supabase.auth.onAuthStateChange((_, session) => {
+        setUser(session?.user ?? null)
+      })
 
     return () => subscription.unsubscribe()
   }, [])
 
-  // 🔐 Google Login
+  // 🔐 Google login
   const loginWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -34,71 +35,67 @@ export default function App() {
     })
   }
 
-  // 🚪 Logout
+  // 🚪 logout
   const logout = async () => {
     await supabase.auth.signOut()
     setUser(null)
   }
 
+  // 📥 DOWNLOAD CONFIG (FIXED)
   const downloadConfig = async () => {
-  const { data, error } = await supabase
-    .from('vpn_users')
-    .select('config_file')
-    .eq('user_id', user.id)
-    .single()
+    if (!user) return
 
-  if (error || !data) {
-    setMessage('No VPN config assigned')
-    setMessageType('error')
-    return
+    const { data, error } = await supabase
+      .from('vpn_users')
+      .select('config_file')
+      .eq('user_id', user.id)
+      .single()
+
+    if (error || !data) {
+      setMessage('No VPN config assigned')
+      setMessageType('error')
+      return
+    }
+
+    const { data: file, error: dlError } = await supabase.storage
+      .from('vpn-configs')
+      .download(data.config_file)
+
+    if (dlError || !file) {
+      setMessage('File not found')
+      setMessageType('error')
+      return
+    }
+
+    const text = await file.text()
+
+    const blob = new Blob([text], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'stargate-vpn.conf'
+    a.click()
+
+    URL.revokeObjectURL(url)
+
+    setMessage('Download started 🚀')
+    setMessageType('success')
   }
 
-  const { data: file, error: dlError } = await supabase.storage
-    .from('vpn-configs')
-    .download(data.config_file)
-
-  if (dlError || !file) {
-    setMessage('File not found')
-    return
-  }
-
-  const text = await file.text()
-
-  const blob = new Blob([text], { type: 'text/plain' })
-  const url = URL.createObjectURL(blob)
-
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'stargate-vpn.conf'
-  a.click()
-
-  URL.revokeObjectURL(url)
-
-  setMessage('Download started')
-  setMessageType('success')
-}
   // ======================
-  // 🔒 LOGIN PAGE
+  // LOGIN PAGE
   // ======================
   if (!user) {
     return (
       <div className="min-h-screen w-full relative overflow-hidden flex items-center justify-center px-4">
 
-        {/* 🌌 SPACE VIDEO */}
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-        >
+        <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
           <source src="/space.mp4" type="video/mp4" />
         </video>
 
-        {/* DARK OVERLAY */}
         <div className="absolute inset-0 bg-black/60"></div>
 
-        {/* LOGIN CARD */}
         <div className="relative z-10 glass w-full max-w-md p-10 rounded-3xl text-center">
 
           <h1 className="glow-title text-5xl font-bold mb-3">
@@ -126,26 +123,17 @@ export default function App() {
   }
 
   // ======================
-  // 🌌 DASHBOARD PAGE
+  // DASHBOARD
   // ======================
   return (
     <div className="min-h-screen w-full relative overflow-hidden flex items-center justify-center px-4">
 
-      {/* 🌌 SPACE VIDEO */}
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="absolute inset-0 w-full h-full object-cover"
-      >
+      <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
         <source src="/space.mp4" type="video/mp4" />
       </video>
 
-      {/* DARK OVERLAY */}
       <div className="absolute inset-0 bg-black/70"></div>
 
-      {/* DASHBOARD CARD */}
       <div className="relative z-10 glass w-full max-w-lg p-10 rounded-3xl">
 
         <h2 className="glow-title text-3xl mb-6 text-center">
@@ -158,9 +146,18 @@ export default function App() {
           <p>🌌 Encryption: QUANTUM-LEVEL</p>
         </div>
 
-        <button onClick={downloadConfig} className="btn-glow w-full py-4 rounded-xl mb-4">
+        <button
+          onClick={downloadConfig}
+          className="btn-glow w-full py-4 rounded-xl mb-4"
+        >
           Download VPN Config
         </button>
+
+        {message && (
+          <p className="text-center text-sm mb-3 text-cyan-300">
+            {message}
+          </p>
+        )}
 
         <button
           onClick={logout}
